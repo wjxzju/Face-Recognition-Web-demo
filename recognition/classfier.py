@@ -131,6 +131,9 @@ def compute_feature(path,net):
 
 
 def checkjson(jsonfile):
+    print "----------------------------------"
+    print "        check json file           "
+    print "----------------------------------"
     with open(jsonfile,'r') as f:
         data_dict = json.load(f)
         for dir in os.listdir(DATASET_DIR):
@@ -143,6 +146,7 @@ def updatejson(jsonfile,net):
     print "----------------------------------"
     print "       update json file           "
     print "----------------------------------"
+    data_dict = {}
     with open(jsonfile,'r') as f:
         data_dict = json.load(f)
         for dir in os.listdir(DATASET_DIR):
@@ -165,9 +169,19 @@ class Classfier(object):
     
     def __init__(self):
         self.net = caffe.Net(DEPLOY_FILE,MODEL_FILE,caffe.TEST)
-        
+        self.threshold = 0.35
 
+    def checkdataset(self):
+        for dir in os.listdir(DATASET_DIR):
+            if os.path.isdir(os.path.join(DATASET_DIR,dir)):
+                subdir = os.path.join(DATASET_DIR,dir)
+                for file in os.listdir(subdir):
+                    if not "_face.jpg" in file:
+                        facefilename = file.split('.')[0]+'_face.jpg'
+                        if not os.path.isfile(os.path.join(subdir,facefilename)):
+                            facefilename = self.alignment(os.path.join(subdir,file))
     def check(self):
+        self.checkdataset()
         if not os.path.exists(JSON_FILE):
             with open(JSON_FILE,'w') as f:
                 data_dict = {}
@@ -186,10 +200,7 @@ class Classfier(object):
             if os.path.isdir(os.path.join(DATASET_DIR,dir)):
                 personlist.append(dir)
 
-    def recognition(self,facefilename):
-        print "----------------------------------"
-        print "       start recognition          "
-        print "----------------------------------"
+    def verification(self,facefilename):
         feature = compute_feature(facefilename,self.net)
 
         with open(JSON_FILE,'r') as f:
@@ -218,6 +229,19 @@ class Classfier(object):
         cv2.imwrite(facefilename,face)
         return facefilename
 
+    def recognition(self,facefilename):
+        print "----------------------------------"
+        print "       start recognition          "
+        print "----------------------------------"
+        result = self.verification(facefilename)
+        result = sorted(result.items(), key=lambda d:d[1])
+        personid = ''
+        if result[0][1] < self.threshold:
+            personid = result[0][0]
 
+        print "----------------------------------"
+        print "   person name         "+ personid
+        print "----------------------------------"
+        return personid
 
 

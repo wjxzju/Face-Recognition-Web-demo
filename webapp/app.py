@@ -52,10 +52,14 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             if facefilename ==  None:
-                flash('This picture can not find faces, please change')
+                flash('This picture can not find faces, Please change another picture')
             else:
-                result = classfier.recognition(facefilename)
-                print result
+                person = classfier.recognition(facefilename)
+                if person == '':
+                    flash('Can not recognize the picture, Please change another picture')
+                else:
+                    flash("The person id is "+person)
+
     return render_template('index.html')
 
 
