@@ -1,0 +1,4 @@
+recognition/model/*
+recognition/dataset/*
+*.jpg
+*.pyc
