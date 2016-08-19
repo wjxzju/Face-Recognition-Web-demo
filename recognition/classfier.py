@@ -134,8 +134,9 @@ def checkjson(jsonfile):
     with open(jsonfile,'r') as f:
         data_dict = json.load(f)
         for dir in os.listdir(DATASET_DIR):
-            if dir not in data_dict.keys():
-                return False
+            if os.path.isdir(os.path.join(DATASET_DIR,dir)):
+                if dir not in data_dict.keys():
+                    return False
     return True
 
 def updatejson(jsonfile,net):
@@ -145,15 +146,16 @@ def updatejson(jsonfile,net):
     with open(jsonfile,'r') as f:
         data_dict = json.load(f)
         for dir in os.listdir(DATASET_DIR):
-            if dir not in data_dict.keys():
-                subdir = os.path.join(DATASET_DIR,dir)
-                data_list  =[] 
-                for file in os.listdir(subdir):
-                    if  "_face.jpg" in file:
-                        image = os.path.join(subdir,file)
-                        data_list.append(compute_feature(image,net).tolist())
-                data_dict[dir] = data_list
-                data_array = np.asarray(data_list,)
+            if os.path.isdir(os.path.join(DATASET_DIR,dir)):
+                if dir not in data_dict.keys():
+                    subdir = os.path.join(DATASET_DIR,dir)
+                    data_list  =[] 
+                    for file in os.listdir(subdir):
+                        if  "_face.jpg" in file:
+                            image = os.path.join(subdir,file)
+                            data_list.append(compute_feature(image,net).tolist())
+                    data_dict[dir] = data_list
+                    data_array = np.asarray(data_list,)
 
     with open(jsonfile,'w') as f:
         json.dump(data_dict,f)
@@ -181,7 +183,8 @@ class Classfier(object):
     def getpersonlist(self):
         personlist = []
         for dir in os.listdir(DATASET_DIR):
-            personlist.append(dir)
+            if os.path.isdir(os.path.join(DATASET_DIR,dir)):
+                personlist.append(dir)
 
     def recognition(self,facefilename):
         print "----------------------------------"

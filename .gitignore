@@ -1,4 +1,4 @@
-recognition/model/*.caffemodel
-recognition/model/*.dat
+*.caffemodel
+*.dat
 *.jpg
 *.pyc
