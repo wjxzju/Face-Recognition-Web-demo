@@ -1,11 +1,17 @@
 #!/usr/bin/python
 #--*-coding: utf-8 --*-
 import os
-from flask import Flask, request, redirect, url_for, render_template, send_from_directory
+from flask import Flask, request, redirect, url_for, render_template, send_from_directory,flash
 from werkzeug.utils import secure_filename
 import tornado.wsgi
 import tornado.httpserver
 import optparse
+
+import sys
+
+sys.path.append('../')
+
+from recognition.classfier import *
 
 
 UPLOAD_FOLDER = "/tmp/"
@@ -14,6 +20,8 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+classfier = Classfier()
+classfier.check()
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -41,8 +49,13 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
+            facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            if facefilename ==  None:
+                print "This picture can not find faces, please Change"
+                flash('This picture can not find faces, please Change')
+            else:
+                result = classfier.recognition(facefilename)
+                print result
     return render_template('index.html')
 
 

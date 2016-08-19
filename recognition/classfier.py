@@ -161,9 +161,9 @@ def updatejson(jsonfile,net):
 
 class Classfier(object):
     
-    def __init__(self,imagefile):
+    def __init__(self):
         self.net = caffe.Net(DEPLOY_FILE,MODEL_FILE,caffe.TEST)
-        self.image = imagefile
+        
 
     def check(self):
         if not os.path.exists(JSON_FILE):
@@ -202,9 +202,9 @@ class Classfier(object):
                 verdict[key] = compare_result.mean()
         return verdict
 
-    def alignment(self):
-        facefilename = self.image.split('.')[0]+'_face.jpg'
-        image = cv2.imread(self.image)
+    def alignment(self,imagefile):
+        facefilename = imagefile.split('.')[0]+'_face.jpg'
+        image = cv2.imread(imagefile)
         image = cv2.resize(image,(250,250))
         try:
              face = alignment(image)
