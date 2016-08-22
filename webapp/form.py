@@ -5,7 +5,7 @@ from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import SubmitField
 
 class PhotoForm(Form):
-    photo = FileField('Image', validators=[
+    photo = FileField('', validators=[
         FileRequired(),
         FileAllowed(['jpg', 'png'], 'Images only!')])
     submit = SubmitField('Submit')

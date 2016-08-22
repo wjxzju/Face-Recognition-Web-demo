@@ -8,6 +8,7 @@ import tornado.wsgi
 import tornado.httpserver
 import optparse
 from form import PhotoForm
+from werkzeug.datastructures import FileStorage
 import sys
 
 sys.path.append('../')
@@ -15,7 +16,7 @@ sys.path.append('../')
 from recognition.classfier import *
 
 
-UPLOAD_FOLDER = "/tmp/"
+UPLOAD_FOLDER = "/tmp"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
@@ -58,6 +59,24 @@ def start_tornado(app, port=5000):
     http_server.listen(port)
     print("Tornado server starting on port {}".format(port))
     tornado.ioloop.IOLoop.instance().start()
+
+@app.route('/realtime',methods=['GET','POST'])
+def realtime():
+    if request.method == 'POST':
+        file = request.files['webcam']
+        filename = 'realtime.jpg'
+        if file:
+            FileStorage(stream=file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename)))
+            facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            if facefilename ==  None:
+                print 'This picture can not find faces, Please change another picture'
+            else:
+                person = classfier.recognition(facefilename)
+                if person == '':
+                    print 'Can not recognize the picture, Please change another picture'
+                else:
+                    print "The person id is "+person
+    return render_template("realtime.html")
 
 
 if __name__ == '__main__':
