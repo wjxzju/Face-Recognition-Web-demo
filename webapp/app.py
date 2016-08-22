@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 import tornado.wsgi
 import tornado.httpserver
 import optparse
-
+from form import PhotoForm
 import sys
 
 sys.path.append('../')
@@ -28,39 +28,28 @@ bootstrap.init_app(app)
 classfier = Classfier()
 classfier.check()
 
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
 @app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'image' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['image']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
+def index():
+    return render_template('base.html')
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            if facefilename ==  None:
-                flash('This picture can not find faces, Please change another picture')
+@app.route('/upload',methods=['GET','POST'])
+def upload():
+    form = PhotoForm()
+    if form.validate_on_submit():
+        filename = secure_filename(form.photo.data.filename)
+        form.photo.data.save(app.config['UPLOAD_FOLDER']+ filename)
+        facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        if facefilename ==  None:
+            flash('This picture can not find faces, Please change another picture')
+        else:
+            person = classfier.recognition(facefilename)
+            if person == '':
+                flash('Can not recognize the picture, Please change another picture')
             else:
-                person = classfier.recognition(facefilename)
-                if person == '':
-                    flash('Can not recognize the picture, Please change another picture')
-                else:
-                    flash("The person id is "+person)
-
-    return render_template('index.html')
+                flash("The person id is "+person)
+    else:
+        filename = None
+    return render_template('upload.html', form=form, filename=filename)
 
 
 def start_tornado(app, port=5000):

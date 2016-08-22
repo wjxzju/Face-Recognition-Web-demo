@@ -1,6 +1,6 @@
 {% extends "bootstrap/base.html" %}
 
-{% block title %}Face Recognition {% endblock %}
+{% block title %}Face Recognition Web Demo {% endblock %}
 
 {% block navbar %}
 <div class="navbar navbar-inverse" role="navigation">
@@ -17,27 +17,26 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="/">Home</a></li>
+                <li><a href="/upload">Upload</a></li>
             </ul>
+            
+
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
+<div class="container">
     {% for message in get_flashed_messages() %}
     <div class="alert alert-warning">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         {{ message }}
     </div>
     {% endfor %}
-   
-    <div class="page-header">
-        <h1>Please upload a picture</h1>
-    </div>
-    <form class="form form-hirizontal" action="" method=post enctype=multipart/form-data>
-        <input type=file name=image> 
 
-        <input type=submit value=Upload>
-    </form>
-
+    {% block page_content %}
+    {% endblock %}
+</div>   
+    
 {% endblock %}

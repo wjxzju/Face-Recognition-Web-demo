@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf%}
+{% block title %}Upload{% endblock %}
+
+
+{% block page_content %}
+    
+    <div class="page-header">
+        <h1> Please upload a picture </h1>
+    </div>
+
+    {{ wtf.quick_form(form)}}
+                
+{% endblock %}
