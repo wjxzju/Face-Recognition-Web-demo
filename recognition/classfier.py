@@ -46,7 +46,7 @@ def getPoints(landmark):
 def getlandmark(im):
 
     image = im.copy()
-    rects = detector(image,1)
+    rects = detector(image,2)
     if len(rects) == 0:
         raise NoFaceError("No face detect")
     cv2.rectangle(image,(rects[0].left(),rects[0].top()),(rects[0].right(),rects[0].bottom()),(0,255,0),2)
