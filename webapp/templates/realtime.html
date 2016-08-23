@@ -7,12 +7,11 @@
    
     <div id="my_camera"></div>
     <br/>
-    <div id="snap_image">
-
-    </div>
+    <div id="snap_image"></div>
     <div>
         <input id="snapshot" type=button value="Snapshot" onClick="take_snapshot()">
         <input id="showresult" type=button value="showresult" onClick="show_result()">
+        <input id="retry" type=button value="retry" onClick="retry()">
     </div>
     <br/>
     <div>
@@ -39,6 +38,8 @@
     document.getElementById('showresult').style.display = 'none';
     document.getElementById('snapshot').style.display = '';
     document.getElementById('snap_image').style.display = 'none';
+    document.getElementById('retry').style.display = 'none';
+    document.getElementById('result').style.display = 'none';
 </script>
 
 
@@ -57,10 +58,11 @@
                     '<h2>The snap image</h2>' +
                     '<img src="'+data_uri+'"/><br/></br>';
              document.getElementById('snap_image').style.display = ''
-             Webcam.reset();
-             document.getElementById('my_camera').style.display = 'none';
+             // Webcam.freeze();
+             document.getElementById('my_camera').style.display = '';
              document.getElementById('showresult').style.display = '';
              document.getElementById('snapshot').style.display = 'none';
+             document.getElementById('retry').style.display = '';
 
              //alert({{info}})
          } );
@@ -74,7 +76,18 @@
                     $("#result").text(data.result)
                 }
             );
+        document.getElementById('result').style.display = '';
     }
 </script>
-
+<script language="JavaScript">
+    function retry(){
+        // Webcam.unfreeze();
+      document.getElementById('snapshot').style.display = '';
+      document.getElementById('my_camera').style.display = '';
+      document.getElementById('showresult').style.display = 'none';
+      document.getElementById('snap_image').style.display = 'none';
+      document.getElementById('retry').style.display = 'none';
+      document.getElementById('result').style.display = 'none';
+    }
+</script>
 {% endblock%}
