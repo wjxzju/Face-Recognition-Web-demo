@@ -1,7 +1,5 @@
 #!---* coding: utf-8 --*--
 #!/usr/bin/python
-import cv2
-import dlib
 import numpy as np
 import sys
 import os

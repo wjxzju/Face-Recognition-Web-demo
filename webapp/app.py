@@ -15,7 +15,7 @@ sys.path.append('../')
 
 from recognition.classfier import *
 from recognition.dataset import db
-
+from recognition.image import alignment
 UPLOAD_FOLDER = "/tmp/"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
@@ -41,7 +41,7 @@ def upload():
     if form.validate_on_submit():
         filename = secure_filename(form.photo.data.filename)
         form.photo.data.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-        facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        facefilename = alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         if facefilename ==  None:
             flash('This picture can not find faces, Please change another picture')
         else:
@@ -66,7 +66,7 @@ def realtime():
         filename = 'realtime.jpg'
         if file:
             FileStorage(stream=file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename)))
-            facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            facefilename = alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             if facefilename ==  None:
                 info = 'This picture can not find faces, Please change another picture'
             else:
@@ -99,7 +99,7 @@ def register():
         file = request.files['webcam']
         filename = 'realtime.jpg'
         FileStorage(stream=file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename)))
-        facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        facefilename = alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         if facefilename is not None:
             session['personface'] = facefilename
         else:
