@@ -1,5 +1,14 @@
 #!---* coding: utf-8 --*--
 #!/usr/bin/python
+
+#----------------------------------------------------------------------------------------------
+#
+# Description: Face recognition Classfier
+# Author: WIll Wu
+# Company: School of MicroElectronic. SJTU
+#
+#-----------------------------------------------------------------------------------------
+
 import numpy as np
 import sys
 import os
@@ -9,20 +18,27 @@ import caffe
 import json
 from dataset import db
 
-
+# The main fold dir, change it if need
 MAIN_DIR = '/home/wjx/work/Face-Recognition-Web-demo/recognition'
 
+# caffe model and prototxt
 MODEL_FILE = MAIN_DIR + '/model/LightenedCNN_B.caffemodel'
 DEPLOY_FILE = MAIN_DIR + '/proto/LightenedCNN_B_deploy_ugrade.prototxt'
 
+# json file use to store the features of pictures in dataset
 JSON_FILE = MAIN_DIR + '/data.json'
+
+# dataset dir
 DATASET_DIR =MAIN_DIR + '/dataset/'
 
+# db for person picture database management
 DATABASE = db()
 
 
 def read_image(filelist):
-
+    '''
+        read an image file, transform, normlization 
+    '''
     X=np.empty((1,1,128,128))
     word=filelist.split('\n')
     filename=word[0]
@@ -36,15 +52,19 @@ def read_image(filelist):
     return X
 
 def compute_feature(path,net):
+    '''
+        compute the feature by caffe model
+    '''
     X=read_image(path)
-
     out = net.forward_all(data = X)
-
     feature = np.float64(out['fc1'])
     return feature
 
 
 def updatejson(jsonfile,net):
+    '''
+        update json file if the dataset changed
+    '''
     print "----------------------------------"
     print "       update json file           "
     print "----------------------------------"
@@ -77,7 +97,13 @@ def updatejson(jsonfile,net):
 
 
 class Classfier(object):
-    
+    '''
+        Classfier for face recognition
+        functions: 
+                self.check(): check json file and dataset
+                self.verification(): compare the input image with dataset
+                self.recognition(): recognize the person id 
+    '''
     def __init__(self):
         self.net = caffe.Net(DEPLOY_FILE,MODEL_FILE,caffe.TEST)
         self.threshold = 0.33

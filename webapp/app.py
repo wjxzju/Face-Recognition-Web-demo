@@ -1,5 +1,14 @@
 #!/usr/bin/python
 #--*-coding: utf-8 --*-
+
+#----------------------------------------------------------------------------------------------
+#
+# Description: Face Recognition Web app
+# Author: WIll Wu
+# Company: School of MicroElectronic. SJTU
+#
+#-----------------------------------------------------------------------------------------
+
 import os
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory, session, flash, jsonify
 from flask_bootstrap import Bootstrap
@@ -16,25 +25,43 @@ sys.path.append('../')
 from recognition.classfier import *
 from recognition.dataset import db
 from recognition.image import alignment
+
+# upload_folder: when picture snapped, store in upload_folder
 UPLOAD_FOLDER = "/tmp/"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
+# flask app setting 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = 'hard to guess string'
 
+# add bootstrap framwork
 bootstrap = Bootstrap()
 bootstrap.init_app(app)
 
+# load classfier for face recognition
 classfier = Classfier()
 classfier.check()
 
+# db means person picture database
 database = db()
 
+#---------------------------------------------
+#
+# Description: base view function
+#
+#---------------------------------------------
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('base.html')
 
+
+#---------------------------------------------
+#
+# Description: upload view function
+# Fcuntion: upload image file, flash the recognition result
+#
+#---------------------------------------------
 @app.route('/upload',methods=['GET','POST'])
 def upload():
     form = PhotoForm()
@@ -54,9 +81,21 @@ def upload():
         filename = None
     return render_template('upload.html', form=form, filename=filename)
 
+#---------------------------------------------
+#
+# Description: just a showresult function for ajax, not for view
+#
+#---------------------------------------------
 @app.route('/_show',methods=['GET'])
 def show():
     return jsonify(result= session['result'])
+
+#---------------------------------------------
+#
+# Description: realtime view function
+# Fcuntion: snapshot picture by using Webcam and recognition the person
+#
+#---------------------------------------------
 
 @app.route('/realtime',methods=['GET','POST'])
 def realtime():
@@ -78,7 +117,13 @@ def realtime():
             session['result'] = info
             return redirect(url_for('realtime'))
     return render_template('realtime.html')
-
+    
+#---------------------------------------------
+#
+# Description: register view function
+# Fcuntion: add new person and new picture of him to the person picture database
+#
+#---------------------------------------------
 
 @app.route('/register',methods=['GET','POST'])
 def register():
@@ -104,8 +149,8 @@ def register():
             session['personface'] = facefilename
         else:
             session['personface'] = 'No face'
-
     return render_template('register.html',form=registform)
+
 
 def start_tornado(app, port=5000):
     http_server = tornado.httpserver.HTTPServer(

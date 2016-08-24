@@ -1,5 +1,14 @@
 #!---* coding: utf-8 --*--
 #!/usr/bin/python
+
+#----------------------------------------------------------------------------------------------
+#
+# Description: image process functions
+# Author: WIll Wu
+# Company: School of MicroElectronic. SJTU
+#
+#-----------------------------------------------------------------------------------------
+
 import cv2
 import dlib
 import numpy as np
@@ -34,7 +43,9 @@ def getPoints(landmark):
 
 
 def getlandmark(im):
-
+    '''
+        detect the lanmark of a face using dlib
+    '''
     image = im.copy()
     rects = detector(image,2)
     if len(rects) == 0:
@@ -55,9 +66,9 @@ def getlandmark(im):
 
 def compute_affine_transform(refpoints, points, w = None):
     '''
-    计算仿射变换矩阵
+        Compute the affine transform matrix
     '''
-    if w == None: #每个关键点的权重
+    if w == None: 
         w = [1] * (len(points) * 2)
     assert(len(w) == 2*len(points))
     y = []
@@ -78,6 +89,14 @@ def compute_affine_transform(refpoints, points, w = None):
 
 
 def alignment(imagefile):
+    '''
+        Input: an imagefile name
+        Output: an facefile name or None
+        Function:
+               alignment a picture, if no face detect, return None
+               Otherwise, return the facefile name
+
+    '''
     facefilename = imagefile.split('.')[0]+'_face.jpg'
     image = cv2.imread(imagefile)
     image = cv2.resize(image,(250,250))
