@@ -2,6 +2,8 @@
 #!/usr/bin/python
 import os
 import shutil
+from image import alignment
+
 MAIN_DIR = '/home/wjx/work/Face-Recognition-Web-demo/recognition'
 DATASET_DIR =MAIN_DIR + '/dataset/'
 
@@ -45,6 +47,15 @@ class db(object):
         print "       add person done            "
         print "----------------------------------"
 
+    def update_dataset(self):
+        for dir in os.listdir(DATASET_DIR):
+            if os.path.isdir(os.path.join(DATASET_DIR,dir)):
+                subdir = os.path.join(DATASET_DIR,dir)
+                for file in os.listdir(subdir):
+                    if not "_face.jpg" in file:
+                        facefilename = file.split('.')[0]+'_face.jpg'
+                        if not os.path.isfile(os.path.join(subdir,facefilename)):
+                            facefilename = alignment(os.path.join(subdir,file))
 if __name__ == '__main__':
     db = db()
     file = '/tmp/realtime_face.jpg'
