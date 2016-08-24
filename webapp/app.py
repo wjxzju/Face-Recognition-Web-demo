@@ -7,14 +7,14 @@ from werkzeug.utils import secure_filename
 import tornado.wsgi
 import tornado.httpserver
 import optparse
-from form import PhotoForm
+from form import PhotoForm,RegForm
 from werkzeug.datastructures import FileStorage
 import sys
 
 sys.path.append('../')
 
 from recognition.classfier import *
-
+from recognition.dataset import db
 
 UPLOAD_FOLDER = "/tmp/"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
@@ -29,6 +29,7 @@ bootstrap.init_app(app)
 classfier = Classfier()
 classfier.check()
 
+database = db()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -78,6 +79,33 @@ def realtime():
             return redirect(url_for('realtime'))
     return render_template('realtime.html')
 
+
+@app.route('/register',methods=['GET','POST'])
+def register():
+    registform = RegForm()
+    if registform.validate_on_submit():
+        if session.get('personface'):
+            facefilename = session['personface'] 
+            if facefilename !='No face':
+                database.addperson(facefilename,registform.name.data)
+                classfier.check()
+                flash('Register new person success')
+            else:
+                flash('Register new person failed, please retry')
+        else:
+            flash('Register new person failed, please retry')
+
+    if request.method =='POST' and request.files.get('webcam'):
+        file = request.files['webcam']
+        filename = 'realtime.jpg'
+        FileStorage(stream=file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename)))
+        facefilename = classfier.alignment(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        if facefilename is not None:
+            session['personface'] = facefilename
+        else:
+            session['personface'] = 'No face'
+
+    return render_template('register.html',form=registform)
 
 def start_tornado(app, port=5000):
     http_server = tornado.httpserver.HTTPServer(

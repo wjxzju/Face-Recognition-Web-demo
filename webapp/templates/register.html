@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf%}
+{% block title %} Registration {% endblock %}
+
+
+{% block page_content %}
+    <div class="page-header">
+        <h1> Registration </h1>
+   </div>
+
+   <div id="my_camera"></div>
+   <br />
+   <div>
+        <input id="snapshot" type=button value="Snapshot" onClick="take_snapshot()">
+    </div>
+   <br />
+   <div id="snap_image"></div>
+   <br />
+   <div id="personname">
+       {{ wtf.quick_form(form)}}
+   </div>
+   
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script type="text/javascript" src={{ url_for('static', filename='webcam.js') }}> </script>
+
+<script language="JavaScript">
+    Webcam.set({
+        width: 250,
+        height: 250,
+        image_format: 'jpeg',
+        jpeg_quality: 90
+    });
+    
+    Webcam.attach( '#my_camera' );
+    document.getElementById('snapshot').style.display = '';
+    document.getElementById('snap_image').style.display = 'none';
+    document.getElementById('personname').style.display = 'none';
+    Webcam.unfreeze()
+    function take_snapshot() {
+        // take snapshot and get image data
+         Webcam.snap( function(data_uri) {
+    // snap complete, image data is in 'data_uri'
+             Webcam.upload( data_uri, '/register', function(code, text) {} );
+             Webcam.freeze()
+             document.getElementById('snap_image').innerHTML =
+                    '<h2>The snap image</h2>' +
+                    '<img src="'+data_uri+'"/><br/></br>';
+             document.getElementById('snap_image').style.display = '';
+             document.getElementById('personname').style.display = '';
+         } );
+    }
+</script>
+
+
+{% endblock%}

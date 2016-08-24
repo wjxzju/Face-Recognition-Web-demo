@@ -9,6 +9,7 @@ import skimage
 import sklearn.metrics.pairwise as pw
 import caffe
 import json
+from dataset import db
 
 MAIN_DIR = '/home/wjx/work/Face-Recognition-Web-demo/recognition'
 
@@ -25,6 +26,7 @@ DATASET_DIR =MAIN_DIR + '/dataset/'
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(PREDICTOR_PATH)
 
+database = db()
 
 class NoFaceError(Exception):
     '''
@@ -130,18 +132,6 @@ def compute_feature(path,net):
     return feature
 
 
-def checkjson(jsonfile):
-    print "----------------------------------"
-    print "        check json file           "
-    print "----------------------------------"
-    with open(jsonfile,'r') as f:
-        data_dict = json.load(f)
-        for dir in os.listdir(DATASET_DIR):
-            if os.path.isdir(os.path.join(DATASET_DIR,dir)):
-                if dir not in data_dict.keys():
-                    return False
-    return True
-
 def updatejson(jsonfile,net):
     print "----------------------------------"
     print "       update json file           "
@@ -151,16 +141,25 @@ def updatejson(jsonfile,net):
         data_dict = json.load(f)
         for dir in os.listdir(DATASET_DIR):
             if os.path.isdir(os.path.join(DATASET_DIR,dir)):
+                subdir = os.path.join(DATASET_DIR,dir)
+                data_list  =[] 
+                #print dir
                 if dir not in data_dict.keys():
-                    subdir = os.path.join(DATASET_DIR,dir)
-                    data_list  =[] 
                     for file in os.listdir(subdir):
                         if  "_face.jpg" in file:
                             image = os.path.join(subdir,file)
                             data_list.append(compute_feature(image,net).tolist())
                     data_dict[dir] = data_list
-                    data_array = np.asarray(data_list,)
-
+                else:
+                    data_list = data_dict[dir]
+                    #print database.getnum(dir)
+                    if len(data_list) < database.getnum(dir):
+                        print "num is not equal, update"
+                        file = str(database.getnum(dir)-1)+'_face.jpg'
+                        image = os.path.join(subdir,file)
+                        if os.path.isfile(image):
+                            data_list.append(compute_feature(image,net).tolist())  
+                    data_dict[dir] = data_list
     with open(jsonfile,'w') as f:
         json.dump(data_dict,f)
 
@@ -171,7 +170,7 @@ class Classfier(object):
         self.net = caffe.Net(DEPLOY_FILE,MODEL_FILE,caffe.TEST)
         self.threshold = 0.35
 
-    def checkdataset(self):
+    def updatedb(self):
         for dir in os.listdir(DATASET_DIR):
             if os.path.isdir(os.path.join(DATASET_DIR,dir)):
                 subdir = os.path.join(DATASET_DIR,dir)
@@ -181,24 +180,19 @@ class Classfier(object):
                         if not os.path.isfile(os.path.join(subdir,facefilename)):
                             facefilename = self.alignment(os.path.join(subdir,file))
     def check(self):
-        self.checkdataset()
+        self.updatedb()
         if not os.path.exists(JSON_FILE):
             with open(JSON_FILE,'w') as f:
                 data_dict = {}
                 json.dump(data_dict,f)
             updatejson(JSON_FILE,self.net)
 
-        elif not checkjson(JSON_FILE):
+        else:
             updatejson(JSON_FILE,self.net)
         print "----------------------------------"
         print "       classfier check done       "
         print "----------------------------------"
 
-    def getpersonlist(self):
-        personlist = []
-        for dir in os.listdir(DATASET_DIR):
-            if os.path.isdir(os.path.join(DATASET_DIR,dir)):
-                personlist.append(dir)
 
     def verification(self,facefilename):
         feature = compute_feature(facefilename,self.net)
@@ -244,4 +238,6 @@ class Classfier(object):
         print "----------------------------------"
         return personid
 
-
+if __name__ == '__main__':
+    classfier = Classfier()
+    classfier.check()
