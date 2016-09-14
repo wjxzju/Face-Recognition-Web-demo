@@ -7,7 +7,7 @@
 * The registered pictures stored in `recognition/dataset/*person_name*/**`
 
 ## How to start?
-* Download `base.jpg`, `LightenedCNN_B.caffemodel`, `shape_predictor_68_face_landmarks.dat` from
+* Download `base.jpg`, `LightenedCNN_B.caffemodel`, `shape_predictor_68_face_landmarks.dat` from   
 > 链接：http://pan.baidu.com/s/1c1W8rJE 密码：223q
 * `cd webapp`, `python app.py` then the system start on server.
 * View the system by the url `http://serverip:5000(default)` 
